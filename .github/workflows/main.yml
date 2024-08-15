@@ -37,11 +37,14 @@ jobs:
         with:
           target: 'http://localhost:3000'  # Replace with your application's base URL
           format: 'html'
-          output: 'zap-report.html'
+          output: '/home/runner/work/zap-report.html'  # Specify full path
           cmd_options: '-configfile /zap/wrk/owasp.conf'
+
+      - name: List Files for Debugging
+        run: ls -R /home/runner/work
 
       - name: Upload ZAP Scan Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-report
-          path: zap-report.html
+          path: /home/runner/work/zap-report.html
