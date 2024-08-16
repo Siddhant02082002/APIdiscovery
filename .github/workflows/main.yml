@@ -40,6 +40,12 @@ jobs:
         run: |
           newman run postman_collection.json --env-var baseUrl=http://localhost:3000
 
+      - name: Upload Postman Collection
+        uses: actions/upload-artifact@v4
+        with:
+          name: postman-collection
+          path: postman_collection.json
+
       - name: Run OWASP ZAP Active Scan
         run: |
           docker pull owasp/zap2docker-stable
