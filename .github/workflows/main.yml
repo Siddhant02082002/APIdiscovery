@@ -22,39 +22,19 @@ jobs:
           # Update the repoPath in config.json using jq
           jq --arg url "${{ github.event.inputs.repo_url }}" '.repoPath = $url' "$CONFIG_FILE" > tmp.$$.json && mv tmp.$$.json "$CONFIG_FILE"
           echo "Updated repoPath in config.json to ${{ github.event.inputs.repo_url }}"
-
       - name: Install Dependencies
         run: |
           npm install
-
       - name: Run JavaScript project
         run: |
           npm run start &  # Start the server in the background
-
-      - name: Wait for Server to be Running
-        run: |
-          timeout=300
-          interval=10
-          elapsed=0
-          while ! curl -s http://localhost:3000/me | grep "OK"; do
-            if [ $elapsed -ge $timeout ]; then
-              echo "Server did not start in time."
-              exit 1
-            fi
-            echo "Waiting for server to be responsive..."
-            sleep $interval
-            elapsed=$((elapsed + interval))
-          done
-          echo "Server is running."
-
+          sleep 10  # Wait for the server to start
       - name: Install Newman
         run: |
           npm install -g newman
-
       - name: Run Postman Collection with Newman
         run: |
-          newman run postman_collection.json --env-var baseUrl=http://localhost:4000
-
+          newman run postman_collection.json --env-var baseUrl=http://localhost:3000
       - name: Upload Postman Collection
         uses: actions/upload-artifact@v4
         with:
@@ -66,7 +46,6 @@ jobs:
           docker pull owasp/zap2docker-stable
           docker run -v $(pwd):/zap/wrk/:rw --network="host" owasp/zap2docker-stable zap-full-scan.py \
             -t http://localhost:3000 -J /zap/wrk/report_json.json -w /zap/wrk/report_md.md -r /zap/wrk/report_html.html
-
       - name: Upload ZAP Scan Report
         uses: actions/upload-artifact@v4
         with:
